@@ -22,15 +22,5 @@ pipeline {
                 }
             }
         }
-
-        stage('Capture Screenshot') {
-            steps {
-                script {
-                    sh 'npm install puppeteer'
-                    sh 'node capture-screenshot.js'
-                    sh 'mv screenshot.png ~/screenshot.png'
-                }
-            }
-        }
     }
 }
