@@ -1,0 +1,48 @@
+---
+- name: Apply Basic CIS Controls
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ensure separate partition exists for /var/log
+      partition: 
+        device: /var/log
+        fstype: xfs 
+
+    - name: Ensure IP forwarding is disabled
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: 0
+        state: present
+
+    - name: Ensure local login warning banner is configured properly
+      lineinfile:
+        path: /etc/issue
+        line: "Authorized access only. All activity may be monitored."
+
+    - name: Ensure IPv6 is disabled
+      sysctl:
+        name: net.ipv6.conf.all.disable_ipv6
+        value: 1
+        state: present
+      sysctl:
+        name: net.ipv6.conf.default.disable_ipv6
+        value: 1
+        state: present
+
+    - name: Ensure login and logout events are collected
+      auditd_rule:
+        name: login-logout-events
+        action: always
+        key: logins
+        list: exit,always
+        type: task
+
+    - name: Ensure password expiration is 90 days or less
+      user:
+        name: "{{ item }}"
+        password_max_days: 90
+      with_items:
+        - root
+        - other_users
+
+
